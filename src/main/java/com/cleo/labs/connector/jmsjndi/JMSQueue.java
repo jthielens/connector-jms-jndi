@@ -36,8 +36,8 @@ public class JMSQueue {
     private Logger logger;
     private JmsJndiConnectorConfig config;
     private String queueName;
-    private String cacheID;
-    private String cacheIDqueue;
+    private String connectionCacheID;
+    private String destinationCacheID;
     private Connection connection;
     private Destination destination;
 
@@ -48,8 +48,8 @@ public class JMSQueue {
         this.config = config;
         this.queueName = config.getQueueName();
         this.logger = logger;
-        this.cacheID = config.getConnectionCacheID();
-        this.cacheIDqueue = cacheID+";"+queueName;
+        this.connectionCacheID = config.getConnectionCacheID()+";"+queueName;  // with the queue-name-in-the-environment hack...
+        this.destinationCacheID = connectionCacheID; // +";"+queueName;        // ...need a new connection (and environment) per queue
 
         logger.debug(String.format("new JMSQueue(%s)", queueName));
 
@@ -75,8 +75,8 @@ public class JMSQueue {
         Destination destination = null;
 
         synchronized (jmsSyncObj) {
-            connection = connectionCache.get(cacheID);
-            destination = destinationCache.get(cacheIDqueue);
+            connection = connectionCache.get(connectionCacheID);
+            destination = destinationCache.get(destinationCacheID);
             int attempt = 0;
             while (connection == null) {
                 attempt++;
@@ -105,7 +105,7 @@ public class JMSQueue {
                     }
 
                     // Look up ConnectionFactory
-                    String connectionFactoryName = config.getUriParameters().getOrDefault("jndiConnectionFactoryName", "ConnectionFactory");
+                    String connectionFactoryName = config.getJNDIConnectionFactoryName();
                     logger.debug(String.format("JMSQueue.connect - ctx.lookup(%s)", connectionFactoryName));
                     ConnectionFactory factory = (ConnectionFactory) ctx.lookup(connectionFactoryName);
 
@@ -131,8 +131,8 @@ public class JMSQueue {
                     destination = (Destination) ctx.lookup(queueName);
 
                     // Save values so we can reuse the same connection
-                    connectionCache.put(cacheID, connection);
-                    destinationCache.put(cacheIDqueue, destination);
+                    connectionCache.put(connectionCacheID, connection);
+                    destinationCache.put(destinationCacheID, destination);
 
                     connection.setExceptionListener(new MyConnectionExceptionListener());
                 } catch (JMSException e) {
@@ -146,8 +146,8 @@ public class JMSQueue {
                             connection = null;
                         }
                     }
-                    connectionCache.remove(cacheID);
-                    destinationCache.remove(cacheIDqueue);
+                    connectionCache.remove(connectionCacheID);
+                    destinationCache.remove(destinationCacheID);
 
                     if (attempt >= CONNECT_RETRY_LIMIT) {
                         throw e;
@@ -617,7 +617,7 @@ public class JMSQueue {
     private Session getJMSSession() throws JMSException {
         Session result = null;
 
-        Connection jmsConnection = connectionCache.get(cacheID);
+        Connection jmsConnection = connectionCache.get(connectionCacheID);
         int attempt = 0;
         while(result == null) {
             attempt++;
@@ -736,17 +736,17 @@ public class JMSQueue {
      * Close a JMS connection
      *----------------------------------------------------------------------------*/
     private void closeConnection() {
-        logger.debug(String.format("JMSQueue.closeConnection - cacheID=%s", cacheID));
+        logger.debug(String.format("JMSQueue.closeConnection - cacheID=%s", connectionCacheID));
         synchronized (jmsSyncObj) {
             // Get the current Connection/Destination
-            Connection currentConnection = connectionCache.get(cacheID);
-            Destination currentDestination = destinationCache.get(cacheIDqueue);
+            Connection currentConnection = connectionCache.get(connectionCacheID);
+            Destination currentDestination = destinationCache.get(destinationCacheID);
 
             if (((destination != null) && (destination == currentDestination))
                     || ((connection != null) && (connection == currentConnection))) {
                 // Remove from HashMap so the connection will be re-established
-                connectionCache.remove(cacheID);
-                destinationCache.remove(cacheIDqueue);
+                connectionCache.remove(connectionCacheID);
+                destinationCache.remove(destinationCacheID);
 
                 // Close the Connection
                 if ((connection != null) && (connection == currentConnection)) {
