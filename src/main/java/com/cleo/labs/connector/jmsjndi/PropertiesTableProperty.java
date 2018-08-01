@@ -32,13 +32,13 @@ public class PropertiesTableProperty {
         .build();
 
     @Property
-    final public IConnectorProperty<String> header = new PropertyBuilder<>("Header", "")
-        .setDescription("Header name")
+    final public IConnectorProperty<String> property = new PropertyBuilder<>("Property", "")
+        .setDescription("Property name")
         .build();
 
     @Property
     final public IConnectorProperty<String> content = new PropertyBuilder<>("Value", "")
-        .setDescription("Header value")
+        .setDescription("Property value")
         .build();
 
     public static class PropertyValue {
