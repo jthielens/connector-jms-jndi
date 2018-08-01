@@ -1,4 +1,7 @@
 #-------------------------------------------------------------------------------
+# test queues use embedded activemq
+activemq-data/
+#-------------------------------------------------------------------------------
 # https://github.com/github/gitignore/blob/master/Global/Eclipse.gitignore
 *.pydevproject
 .metadata
