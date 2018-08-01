@@ -39,6 +39,15 @@ public class JmsJndiConnectorConfig {
     }
 
     /**
+     * Gets the JNDI Connection Factory Name property.
+     * @return the JNDI Connection Factory Name
+     * @throws ConnectorPropertyException
+     */
+    public String getJNDIConnectionFactoryName() throws ConnectorPropertyException {
+        return schema.jndiConnectionFactoryName.getValue(client);
+    }
+
+    /**
      * Gets the JNDI Connection URI property.
      * @return the JNDI Connection URI
      * @throws ConnectorPropertyException

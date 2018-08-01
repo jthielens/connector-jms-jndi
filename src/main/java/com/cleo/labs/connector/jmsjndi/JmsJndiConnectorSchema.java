@@ -30,6 +30,13 @@ public class JmsJndiConnectorSchema extends ConnectorConfig {
             .build();
 
     @Property
+    final IConnectorProperty<String> jndiConnectionFactoryName = new PropertyBuilder<>("JNDIConnectionFactoryiName", "ConnectionFactory")
+            .setDescription("The JNDI Connection Factory class name.")
+            .setGroup(Connect)
+            .setRequired(true)
+            .build();
+
+    @Property
     final IConnectorProperty<String> jndiConnectionURI = new PropertyBuilder<>("JNDIConnectionURI", "")
             .setDescription("The JNDI connection URI.")
             .setGroup(Connect)
