@@ -47,6 +47,7 @@
 		<mockito-all.version>1.9.5</mockito-all.version>
 		<gson.version>2.2</gson.version>
 		<cleo.version>5.5.0.0</cleo.version>
+		<connector.api.testing.version>5.5.0.0-SNAPSHOT</connector.api.testing.version>
 		<jms.version>2.0.1</jms.version>
 		<activemq.version>5.15.4</activemq.version>
 		<maven.assembly.plugin.version>3.1.0</maven.assembly.plugin.version>
@@ -70,6 +71,12 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>${mockito-all.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.cleo.labs</groupId>
+			<artifactId>connector-api-testing</artifactId>
+			<version>${connector.api.testing.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
